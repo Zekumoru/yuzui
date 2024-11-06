@@ -13,6 +13,7 @@ const languages = [
   { language: 'czech', code: 'cs' },
   { language: 'danish', code: 'da' },
   { language: 'dutch', code: 'nl' },
+  { language: 'english', code: 'en' },
   { language: 'estonian', code: 'et' },
   { language: 'finnish', code: 'fi' },
   { language: 'french', code: 'fr' },
