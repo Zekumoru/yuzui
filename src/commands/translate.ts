@@ -3,8 +3,19 @@ import { createCommand } from '../../types/DiscordCommand';
 import openai from '../utils/openai';
 import logger from '../utils/logger';
 import languages from '../utils/languages';
+import { readFileSync } from 'fs';
+import fs from 'fs/promises';
+import path from 'path';
 
-let totalConsumedTokens = 0;
+const translationsLogPath = path.join(__dirname, '../../logs/translations');
+
+const totalConsumedTokensPath = path.join(
+  __dirname,
+  '../../logs/total-consumed-tokens'
+);
+let totalConsumedTokens = Number(readFileSync(totalConsumedTokensPath, 'utf8'));
+if (isNaN(totalConsumedTokens)) totalConsumedTokens = 0;
+
 export default createCommand({
   data: new SlashCommandBuilder()
     .setName('translate')
@@ -97,9 +108,23 @@ export default createCommand({
     const username = interaction.user.username;
     const { total_tokens } = completion.usage!;
     totalConsumedTokens += total_tokens;
-    logger.info(
-      `${username} translated a message costing ${total_tokens} tokens. (Total: ${totalConsumedTokens} tokens)`
-    );
+
+    const log = `${username} translated a message costing ${total_tokens} tokens.`;
+
+    await Promise.all([
+      fs.appendFile(
+        translationsLogPath,
+        `[${new Date().toLocaleString('en-US')}] ${log}\n`,
+        'utf8'
+      ),
+      fs.writeFile(
+        totalConsumedTokensPath,
+        totalConsumedTokens.toString(),
+        'utf8'
+      ),
+    ]);
+
+    logger.info(`${log} (Total: ${totalConsumedTokens} tokens)`);
 
     interaction.reply({
       content: translated,
