@@ -19,6 +19,7 @@ if (isNaN(totalConsumedTokens)) totalConsumedTokens = 0;
 const isValidLanguage = (inputLanguage: string) => {
   return languages.some(
     (lang) =>
+      inputLanguage.toLowerCase() === `${lang.language} (${lang.code})` ||
       lang.language.toLowerCase().startsWith(inputLanguage.toLowerCase()) ||
       lang.code.toLowerCase() === inputLanguage.toLowerCase()
   );
