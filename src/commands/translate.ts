@@ -16,6 +16,14 @@ const totalConsumedTokensPath = path.join(
 let totalConsumedTokens = Number(readFileSync(totalConsumedTokensPath, 'utf8'));
 if (isNaN(totalConsumedTokens)) totalConsumedTokens = 0;
 
+const isValidLanguage = (inputLanguage: string) => {
+  return languages.some(
+    (lang) =>
+      lang.language.toLowerCase().startsWith(inputLanguage.toLowerCase()) ||
+      lang.code.toLowerCase() === inputLanguage.toLowerCase()
+  );
+};
+
 export default createCommand({
   data: new SlashCommandBuilder()
     .setName('translate')
@@ -72,6 +80,14 @@ export default createCommand({
     const context = interaction.options.getString('context');
     const casual = interaction.options.getBoolean('casual') ?? false;
     const ephemeral = interaction.options.getBoolean('ephemeral') ?? false;
+
+    if (!isValidLanguage(language)) {
+      interaction.reply({
+        content: `Invalid inputted language: ${language}`,
+        ephemeral: true,
+      });
+      return;
+    }
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
