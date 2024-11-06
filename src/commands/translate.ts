@@ -140,7 +140,9 @@ export default createCommand({
       ),
     ]);
 
-    logger.info(`${log} (Total: ${totalConsumedTokens} tokens)`);
+    logger.info(
+      `${log} (Total since inception: ${totalConsumedTokens} tokens)`
+    );
 
     interaction.reply({
       content: translated,
