@@ -19,4 +19,4 @@ jobs:
 
       - name: Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} 'cd ~/repos/yuzui && git pull && pm2 restart Yuzui'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} 'cd ~/repos/yuzui && git pull && pm2 restart Yuzui --silent'
