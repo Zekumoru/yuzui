@@ -94,6 +94,8 @@ export default createCommand({
       return;
     }
 
+    interaction.deferReply({ ephemeral });
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -119,9 +121,8 @@ export default createCommand({
     const translated = completion.choices[0].message.content;
     if (!translated) {
       logger.error(completion, `Empty translated content`);
-      interaction.reply({
+      interaction.editReply({
         content: `Something went wrong and couldn't translate.`,
-        ephemeral: true,
       });
       return;
     }
@@ -149,9 +150,8 @@ export default createCommand({
       `${log} (Total since inception: ${totalConsumedTokens} tokens)`
     );
 
-    interaction.reply({
+    interaction.editReply({
       content: translated,
-      ephemeral,
     });
   },
 });
