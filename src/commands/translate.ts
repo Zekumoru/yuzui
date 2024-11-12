@@ -63,16 +63,20 @@ export default createCommand({
       InteractionContextType.PrivateChannel,
     ]),
   autocomplete: async (interaction) => {
-    const focusedValue = interaction.options.getFocused();
-    const choices = languages.map((lang) => `${lang.language} (${lang.code})`);
-    const filtered = choices
-      .filter((choice) =>
-        choice.toLowerCase().startsWith(focusedValue.toLowerCase())
+    const focusedValue = interaction.options.getFocused().toLowerCase();
+    const filtered = languages
+      .filter(
+        (lang) =>
+          lang.language.toLowerCase().startsWith(focusedValue) ||
+          lang.code.toLowerCase().startsWith(focusedValue)
       )
       .slice(0, 25);
 
     await interaction.respond(
-      filtered.map((choice) => ({ name: choice, value: choice }))
+      filtered.map((lang) => ({
+        name: `${lang.language} (${lang.code})`,
+        value: lang.code,
+      }))
     );
   },
   execute: async (interaction) => {
