@@ -9,6 +9,7 @@ import path from 'path';
 import { argv, exit } from 'process';
 import { DiscordCommand } from '../types/DiscordCommand';
 import logger from './utils/logger';
+import asyncExec from './utils/async-exec';
 
 // check whether to deploy globally or locally to guild development
 const isGlobal = argv.some(
@@ -59,28 +60,29 @@ interface RestResult {
 }
 
 (async () => {
-  try {
-    logger.info(
-      `Started refreshing${isGlobal ? ' globally ' : ' '}${
-        commands.length
-      } application (/) commands.`
-    );
+  logger.info(
+    `Started refreshing${isGlobal ? ' globally ' : ' '}${
+      commands.length
+    } application (/) commands.`
+  );
 
-    const route = isGlobal
-      ? Routes.applicationCommands(clientId)
-      : Routes.applicationGuildCommands(clientId, guildId!);
+  const route = isGlobal
+    ? Routes.applicationCommands(clientId)
+    : Routes.applicationGuildCommands(clientId, guildId!);
 
-    // The put method is used to fully refresh all commands in the guild with
-    // the current set
-    const data = (await rest.put(route, { body: commands })) as RestResult;
+  // The put method is used to fully refresh all
+  // commands in the guild with the current set
+  const [data, error] = await asyncExec(
+    rest.put(route, { body: commands }) as Promise<RestResult>
+  );
 
-    logger.info(
-      `Successfully reloaded ${data.length} application (/) commands.`
-    );
-  } catch (error) {
+  if (!data) {
     logger.error(
       error,
       `An error has occurred while registering the commands.`
     );
+    return;
   }
+
+  logger.info(`Successfully reloaded ${data.length} application (/) commands.`);
 })();

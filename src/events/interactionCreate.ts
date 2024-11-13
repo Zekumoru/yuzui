@@ -1,6 +1,7 @@
 import { CacheType, Collection, Events, Interaction } from 'discord.js';
 import logger from '../utils/logger';
 import { createEvent, DiscordEvent } from '../../types/DiscordEvent';
+import asyncExec from '../utils/async-exec';
 
 export default createEvent({
   name: Events.InteractionCreate,
@@ -47,21 +48,22 @@ export default createEvent({
     timestamps?.set(interaction.user.id, now);
     setTimeout(() => timestamps?.delete(interaction.user.id), cooldownAmount);
 
-    try {
-      await command.execute(interaction);
-    } catch (error) {
-      logger.error(error);
+    const [_, error] = await asyncExec(command.execute(interaction));
 
-      const errorMessageContent = {
-        content: 'There was an error while executing this command!',
-        ephemeral: true,
-      };
+    if (!error) return;
 
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp(errorMessageContent);
-      } else {
-        await interaction.reply(errorMessageContent);
-      }
+    // handle errors
+    logger.error(error);
+
+    const errorMessageContent = {
+      content: 'There was an error while executing this command!',
+      ephemeral: true,
+    };
+
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp(errorMessageContent);
+    } else {
+      await interaction.reply(errorMessageContent);
     }
   },
 } as DiscordEvent);

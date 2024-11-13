@@ -1,6 +1,7 @@
 import { CacheType, Events, Interaction } from 'discord.js';
 import { DiscordEvent } from '../../types/DiscordEvent';
 import logger from '../utils/logger';
+import asyncExec from '../utils/async-exec';
 
 export default {
   name: Events.InteractionCreate,
@@ -11,13 +12,10 @@ export default {
     if (!command) return;
     if (!command.autocomplete) return;
 
-    try {
-      await command.autocomplete(interaction);
-    } catch (error) {
-      logger.error(
-        error,
-        `Could not autocomplete command: ${command.data.name}`
-      );
-    }
+    const [_, error] = await asyncExec(command.autocomplete(interaction));
+    if (!error) return;
+
+    // handle errors
+    logger.error(error, `Could not autocomplete command: ${command.data.name}`);
   },
 } as DiscordEvent;
