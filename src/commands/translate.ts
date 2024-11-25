@@ -94,7 +94,7 @@ export default createCommand({
       return;
     }
 
-    interaction.deferReply({ ephemeral });
+    await interaction.deferReply({ ephemeral });
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
